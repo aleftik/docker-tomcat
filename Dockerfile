@@ -1,13 +1,15 @@
 # install Java7 from http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.rpm
-FROM centos:latest
+FROM centos:centos6
 RUN yum -y install wget
 RUN yum -y install git
 RUN yum -y install unzip
 RUN yum -y install tar
+#hack for centos docker bug
+RUN mkdir -p /run/lock
+RUN yum -y install httpd
 
-
-
-
+#FOR HTTPD
+ADD ajp_proxy.conf /etc/httpd/conf.d/
 
 #JDK
 RUN wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u71-b14/jdk-7u71-linux-x64.rpm -O jdk-linux-x64.rpm
@@ -28,7 +30,7 @@ ENV PATH $PATH:$GRADLE_HOME/bin
 RUN git clone https://github.com/Appdynamics/ECommerce-Java.git
 
 #Gradle
-RUN cd ECommerce-Java;gradle war
+RUN cd /ECommerce-Java;gradle war
 
 #TOMCAT
 ENV TOMCAT_MAJOR_VERSION 8
@@ -43,5 +45,11 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR_VERSION
     mv apache-tomcat* tomcat
 
 RUN cd ${CATALINA_HOME}/bin;chmod +x *.sh
-CMD [${CATALINA_HOME}/bin/startup.sh]
-EXPOSE 8080
+ADD startup.sh /
+RUN chmod +x /startup.sh
+WORKDIR /
+CMD ["/bin/bash","/startup.sh"]
+
+EXPOSE 80
+EXPOSE 8009
+EXPOSE 8000	
