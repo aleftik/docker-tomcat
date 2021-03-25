@@ -1,5 +1,5 @@
 # install Java7 from http://download.oracle.com/otn-pub/java/jdk/7u51-b13/jdk-7u51-linux-x64.rpm
-FROM centos:centos6
+FROM centos:latest
 RUN yum -y install wget
 RUN yum -y install git
 RUN yum -y install unzip
